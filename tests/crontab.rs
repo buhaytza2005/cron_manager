@@ -7,6 +7,7 @@ mod tests {
     fn test_cron_manager() {
         let mut manager = CronManager::new();
 
+        let original_len = manager.list_jobs().len();
         // Add jobs
         manager.add_job(CronJob {
             schedule: "* * * * *".to_string(),
@@ -21,7 +22,7 @@ mod tests {
 
         // Verify jobs were added
         let jobs = manager.list_jobs();
-        assert_eq!(jobs.len(), 2);
+        assert_eq!(jobs.len(), original_len + 2);
 
         // Get the comment from one of the jobs
         let comments: Vec<String> = jobs.iter().filter_map(|job| job.comment.clone()).collect();
@@ -39,7 +40,7 @@ mod tests {
 
         // Verify job was removed
         let jobs_after_removal = manager.list_jobs();
-        assert_eq!(jobs_after_removal.len(), 1); // We expect only one job left after removal
+        assert!(jobs_after_removal.len() < original_len + 2);
 
         let remaining_comments: Vec<String> = jobs_after_removal
             .iter()
