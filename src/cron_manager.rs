@@ -38,6 +38,7 @@ impl fmt::Display for CronJob {
     }
 }
 
+#[derive(Clone)]
 pub struct CronManager {
     jobs: Vec<CronJob>,
 }

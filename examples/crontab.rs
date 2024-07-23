@@ -1,27 +1,33 @@
 use cron_manager::cron_manager::{CronJob, CronManager};
-use rand::Rng;
 
 fn main() {
     let mut manager = CronManager::new();
+
+    let _ = list_cronjobs(&mut manager);
+    let _ = add_cronjob(&mut manager);
+
+    let _ = remove_job_by_id(&mut manager, 0);
+    let _ = remove_job_by_comment(&mut manager, "test");
+}
+
+fn list_cronjobs(manager: &mut CronManager) {
     for (i, job) in manager.list_jobs().iter().enumerate() {
         println!("{}: {}", i, job);
     }
+}
 
-    manager.add_job(CronJob {
-        schedule: "* * * * *".to_string(),
-        command: "/bin/echo hello > /tmp/hello".to_string(),
-        comment: Some("testing".to_string()),
-    });
+fn add_cronjob(manager: &mut CronManager) {
     manager.add_job(CronJob {
         schedule: "* * * * *".to_string(),
         command: "/bin/echo hello > /tmp/hello".to_string(),
         comment: Some("test".to_string()),
     });
+}
 
-    let rand_comm = vec!["test", "testing"];
+fn remove_job_by_comment(manager: &mut CronManager, arg: &str) {
+    manager.remove_job_by_comment(arg);
+}
 
-    let mut rng = rand::thread_rng();
-    let random_bool = rng.gen();
-    let r = if random_bool { 1 } else { 0 };
-    manager.remove_job_by_comment(rand_comm[r]);
+fn remove_job_by_id(manager: &mut CronManager, arg: usize) {
+    manager.remove_job(arg);
 }
