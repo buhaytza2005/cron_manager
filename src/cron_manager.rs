@@ -1,3 +1,4 @@
+use core::fmt;
 use std::{
     io::{BufRead, BufReader, Cursor, Write},
     process::Command,
@@ -24,6 +25,15 @@ impl CronJob {
         match &self.comment {
             Some(comment) => format!("{} {} # {}", self.schedule, self.command, comment),
             None => format!("{} {}", self.schedule, self.command),
+        }
+    }
+}
+
+impl fmt::Display for CronJob {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match &self.comment {
+            Some(comment) => write!(f, "{} {} # {}", self.schedule, self.command, comment),
+            None => write!(f, "{} {}", self.schedule, self.command),
         }
     }
 }
