@@ -73,7 +73,7 @@ impl CronManager {
 
     ///saves crontab by creating a temporary file then calling `crontab <file_name>` which
     ///essentially overwrites the crontab
-    pub fn save_crontab(&self) -> Result<(), std::io::Error> {
+    fn save_crontab(&self) -> Result<(), std::io::Error> {
         let mut temp_file = NamedTempFile::new()?;
         for job in &self.jobs {
             writeln!(temp_file, "{}", job.to_string())?;
@@ -83,6 +83,7 @@ impl CronManager {
         Ok(())
     }
 
+    ///adds job and saves the crontab
     pub fn add_job(&mut self, job: CronJob) {
         self.jobs.push(job);
         self.save_crontab().unwrap();
@@ -90,5 +91,41 @@ impl CronManager {
 
     pub fn list_jobs(&self) -> &Vec<CronJob> {
         &self.jobs
+    }
+
+    ///removes job at specific index and saves the crontab
+    pub fn remove_job(&mut self, index: usize) {
+        if index < self.jobs.len() {
+            self.jobs.remove(index);
+            self.save_crontab().unwrap();
+        }
+    }
+
+    ///removes job based on comment
+    ///
+    ///Iterates over the jobs and creates a list of indexes  where the comment for the job matches
+    ///the comment passed as a parameter.
+    pub fn remove_job_by_comment(&mut self, comment: &str) {
+        let mut to_remove = Vec::new();
+
+        for (i, job) in self.jobs.iter().enumerate() {
+            match &job.comment {
+                Some(comm) => {
+                    if *comm == comment.to_string() {
+                        to_remove.push(i)
+                    } else {
+                        continue;
+                    }
+                }
+                None => continue,
+            }
+        }
+        // removing items may shift indexes, for example removing position 1 shifts pos 2 to 1 and
+        // the indexes would be incorrect. If done in reverse, only the indexes that don't need to
+        // be visited again will shift
+        for index in to_remove.into_iter().rev() {
+            self.jobs.remove(index);
+        }
+        self.save_crontab().unwrap();
     }
 }
